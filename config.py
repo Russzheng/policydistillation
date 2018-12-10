@@ -156,6 +156,7 @@ class Pong_v0_config_student(StudentBaseConfig):
 
     # student training
     student_loss = 'kl' # student loss when training on teacher Q values
+    exp_policy = 'None'
     mse_prob_loss_weight = 1. # weight associated with the MSE over action probabilities loss
     nll_loss_weight = 1. # weight associated with the NLL over Q values/action probabilities loss
 
@@ -224,11 +225,65 @@ class PongNoFrameskip_v4_config_teacher(TeacherBaseConfig):
     # lr_begin           = 0.0001 # original implementation: 0.00025, Berkeley implementation: 1e-4
     # lr_end             = 0.00005
     # exploration
-    # eps_begin          = 1
-    # eps_end            = 0.1
+    eps_begin          = 1
+    eps_end            = 0.1
     # eps_nsteps         = self.nsteps_train/2
 
     learning_start     = 50000
+
+class PongNoFrameskip_v4_config_student(StudentBaseConfig):
+    # env config
+    render_train     = False
+    render_test      = False
+    env_name         = "Pong-v0"
+    overwrite_render = True
+    record           = False
+    high             = 255.
+
+    # processing
+    preprocess_state = 'greyscale'
+    # process teacher Q values with the given method
+    process_teacher_q = 'softmax'
+    # choose the teacher Q values at each iteration with the given method
+    choose_teacher_q = 'mean'
+    # tau value for softmax_teacher_q to sharpen (tau < 1) or soften (tau > 1)
+    # the teacher Q values
+    softmax_teacher_q_tau = 0.01
+
+    # student training
+    student_loss = 'kl' # student loss when training on teacher Q values
+    exp_policy = 'None'
+    mse_prob_loss_weight = 1. # weight associated with the MSE over action probabilities loss
+    nll_loss_weight = 1. # weight associated with the NLL over Q values/action probabilities loss
+
+    # model and training config
+    num_episodes_test = 50
+    grad_clip         = True
+    clip_val          = 10
+    saving_freq       = 250000
+    log_freq          = 50
+    eval_freq         = 250000
+    record_freq       = 250000
+    soft_epsilon      = 0.05
+
+    # nature paper hyper params
+    q_values_model = 'nature_cnn'
+    double_q           = False
+    # nsteps_train       = 5000000
+    batch_size         = 32
+    buffer_size        = 1000000
+    target_update_freq = 10000
+    gamma              = 0.99
+    learning_freq      = 4
+    state_history      = 4
+    skip_frame         = 4
+    lr_begin           = 0.00025 # original implementation: 0.00025, Berkeley implementation: 1e-4
+    lr_end             = 0.00005
+    eps_begin          = 1
+    eps_end            = 0.1
+    eps_nsteps         = 1000000
+    learning_start     = 50000
+
 
 # class atariconfig_student():
 #     # env config

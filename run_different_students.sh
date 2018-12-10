@@ -1,7 +1,7 @@
 set -eux
 
-TEACHER_CHECKPOINT_DIR="results/Pong-v0_greyscale_mse_teacher_2018-11-06-13-43-39/teacher/model.weights/"
-TEACHER_NAME="Pong_v0_greyscale_mse"
+TEACHER_CHECKPOINT_DIR="results/home/russzheng/policydistillation/results/PongNoFrameskip-v4_greyscale_huber_teacher/teacher_PongNoFrameskip-v4_greyscale_huber_teacher/model.weights"
+TEACHER_NAME="PongNoFrameskip-v4_greyscale_huber_teacher"
 
 ## Softmax sharpening
 
@@ -9,7 +9,7 @@ TEACHER_NAME="Pong_v0_greyscale_mse"
 # DONE: max evaluated reward: 11.32 +/- 0.50
 # python distilledqn_atari.py Pong-v0 Pong-v0_greyscale_mse_prob_softmax_0.01 $TEACHER_CHECKPOINT_DIR mse_prob softmax_tau -stqt 0.01
 # debugging new multi-teacher format
-python distilledqn_atari.py Pong-v0 Pong-v0_greyscale_mse_prob_softmax_0.01_multiteacher_test mse_prob softmax_tau none -stqt 0.01 -tcd $TEACHER_CHECKPOINT_DIR -tcn $TEACHER_NAME
+python distilledqn_atari.py PongNoFrameskip-v4 PongNoFrameskip-v4_greyscale_huber_teacher mse_prob softmax_tau none -stqt 0.01 -tcd $TEACHER_CHECKPOINT_DIR -tcn $TEACHER_NAME -exp_policy None
 
 # MSE of action probabilities with softmax sharpening + NLL
 # python distilledqn_atari.py Pong-v0 Pong-v0_greyscale_mse_prob_nll_softmax_0.01 $TEACHER_CHECKPOINT_DIR mse_prob_nll softmax_tau -stqt 0.01

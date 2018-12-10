@@ -32,13 +32,17 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('env_name', type=str, help='Environment.')
     parser.add_argument('exp_name', type=str, help='Experiment name.')
-    parser.add_argument('student_loss', type=str, 
+    parser.add_argument('-sl', '--student_loss', type=str, 
         choices=['mse_qval', 'mse_prob', 'mse_prob_nll', 'nll', 'kl'],
         help='The loss the student uses to learn from the teacher\'s Q values.')
-    parser.add_argument('process_teacher_q', choices=['none', 'softmax_tau'],
+    parser.add_argument('-ptq', '--process_teacher_q', choices=['none', 'softmax_tau'],
         help='How to process the teacher Q values for the student loss.')
-    parser.add_argument('choose_teacher_q', choices=['none', 'mean', 'random'],
+    parser.add_argument('-ctq', '--choose_teacher_q', choices=['none', 'mean', 'random'],
         help='How to choose the teacher Q values for the student loss at each iteration.')
+    parser.add_argument('-ep', '--exp_policy', type=str, default='greedy',
+        choices=['greedy'],
+        help='The exploration policy the student uses to learn from the teacher\'s Q values.')
+
     parser.add_argument('-tcd', '--teacher_checkpoint_dirs', nargs='+', type=str, 
             help='Paths to teachers\' checkpoint files (in same order as their names).')
     parser.add_argument('-tcn', '--teacher_checkpoint_names', nargs='+', type=str, 
@@ -78,6 +82,7 @@ if __name__ == '__main__':
     student_config.nll_loss_weight = args.nll_loss_weight
     student_config.nsteps_train = args.nsteps_train
     student_config.lr_nsteps = args.nsteps_train / 2
+    student_config.exp_policy = args.exp_policy
 
     # make env
     env = gym.make(student_config.env_name)

@@ -124,6 +124,7 @@ class PiecewiseExploration(PiecewiseSchedule):
         """
 
         rand = np.random.choice([True, False], p=[self.epsilon, 1-self.epsilon])
+        
         if rand:
             return self.env.action_space.sample()
         else:
@@ -159,7 +160,6 @@ def test3():
     exp_strat.update(20)
     assert exp_strat.epsilon == 0.5, "Test 3 failed"
     print("Test3: ok")
-
 
 def your_test():
     """

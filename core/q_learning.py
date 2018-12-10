@@ -167,7 +167,6 @@ class QN(object):
                 exp_schedule.get_action(best_action) returns an action
             lr_schedule: Schedule for learning rate
         """
-
         replay_buffer = ReplayBuffer(self.config.buffer_size, self.config.state_history)
         rewards = deque(maxlen=self.config.num_episodes_test)
         max_q_values = deque(maxlen=1000)
@@ -196,9 +195,12 @@ class QN(object):
                 # self.q_inputs.append(q_input)
 
                 # chose action according to current Q and exploration
+                # if self.config.exp_policy == 'None':
+                print(self.config.exp_policy)
+                exit()
                 best_action, q_values = self.get_best_action(q_input)
                 action                = exp_schedule.get_action(best_action)
-
+                
                 # store q values
                 max_q_values.append(max(q_values))
                 q_values += list(q_values)

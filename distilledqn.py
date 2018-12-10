@@ -11,6 +11,7 @@ from utils.test_env import EnvTest
 from schedule import LinearExploration, LinearSchedule
 from linear import Linear
 from natureqn import NatureQN
+import os
 
 import logging
 
@@ -140,10 +141,19 @@ Use distilled Q network for test environment.
 """
 if __name__ == '__main__':
     env = EnvTest((80, 80, 1))
+    
+    # Explicitly let it run on CPU for testing purposes
+
+    # os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+    # if tf.test.gpu_device_name():
+    #     print('GPU found')
+    # else:
+    #     print("No GPU found")
 
     # exploration strategy
-    exp_schedule = LinearExploration(env, config.eps_begin, 
-            config.eps_end, config.eps_nsteps)
+    if config.exp_policy == 'greedy':
+        exp_schedule = LinearExploration(env, config.eps_begin, 
+                config.eps_end, config.eps_nsteps)
 
     # learning rate schedule
     lr_schedule  = LinearSchedule(config.lr_begin, config.lr_end,
