@@ -2,6 +2,7 @@ import pdb
 
 import tensorflow as tf
 import tensorflow.contrib.layers as layers
+import tensorflow.contrib.slim as slim
 
 from core.deep_q_learning import DQN
 from schedule import LinearExploration, LinearSchedule
@@ -41,11 +42,15 @@ class Linear(DQN):
         self.done_mask = tf.placeholder(tf.bool,
             shape=(None))
         self.lr = tf.placeholder(tf.float32)
+        self.keep_per = tf.placeholder(shape=None,dtype=tf.float32)
 
         if self.student:
             self.teacher_q = tf.placeholder(tf.float32,
                 shape=(self.num_teachers, None, num_actions))
 
+            # temperature
+            self.temp = tf.placeholder(shape=(self.num_teachers, None, num_actions), dtype=tf.float32)
+            self.Q_dist = slim.softmax(self.teacher_q / self.temp)
 
     def get_q_values_op(self, state, scope, reuse=False):
         """
@@ -65,6 +70,7 @@ class Linear(DQN):
         out = state
         
         with tf.variable_scope(scope, reuse=reuse):
+            out = slim.dropout(out, self.keep_per)
             out = layers.fully_connected(layers.flatten(out), num_actions, activation_fn=None)
 
         return out

@@ -89,7 +89,7 @@ class QN(object):
         pass
 
 
-    def get_best_action(self, state):
+    def get_best_action(self, state, exp_policy):
         """
         Returns best action according to the network
     
@@ -108,10 +108,14 @@ class QN(object):
         Args:
             state: observation from gym
         """
-        if np.random.random() < self.config.soft_epsilon:
-            return self.env.action_space.sample()
-        else:
-            return self.get_best_action(state)[0]
+        if self.config.exp_policy == 'greedy':
+            if np.random.random() < self.config.soft_epsilon:
+                return self.env.action_space.sample()
+            else:
+                return self.get_best_action(state, self.config.exp_policy)[0]
+                
+        if self.config.exp_policy == 'bayesian':
+            return self.get_best_action(state, self.config.exp_policy)[0]
 
 
     def update_target_params(self):
@@ -196,11 +200,9 @@ class QN(object):
 
                 # chose action according to current Q and exploration
                 # if self.config.exp_policy == 'None':
-                print(self.config.exp_policy)
-                exit()
-                best_action, q_values = self.get_best_action(q_input)
+                best_action, q_values = self.get_best_action(q_input, self.config.exp_policy)
                 action                = exp_schedule.get_action(best_action)
-                
+                # from IPython import embed; embed()
                 # store q values
                 max_q_values.append(max(q_values))
                 q_values += list(q_values)

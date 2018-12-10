@@ -186,7 +186,7 @@ class DQN(QN):
         self.saver.save(self.sess, self.config.model_output)
 
 
-    def get_best_action(self, state):
+    def get_best_action(self, state, exp_policy):
         """
         Return best action
 
@@ -196,7 +196,11 @@ class DQN(QN):
             action: (int)
             action_values: (np array) q values for all actions
         """
-        action_values = self.sess.run(self.q, feed_dict={self.s: [state]})[0]
+        if exp_policy == 'bayesian':
+            action_values = self.sess.run(self.q, feed_dict={self.s: [state], self.keep_per: 0.1})[0]
+        else:
+            action_values = self.sess.run(self.q, feed_dict={self.s: [state], self.keep_per: 1.0})[0]
+
         return np.argmax(action_values), action_values
 
 

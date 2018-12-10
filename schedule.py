@@ -100,6 +100,30 @@ class LinearExploration(LinearSchedule):
         else:
             return best_action
 
+class BayesianExploration(LinearSchedule):
+    def __init__(self, env, eps_begin, eps_end, nsteps):
+        """
+        Args:
+            env: gym environment
+            eps_begin: initial exploration
+            eps_end: end exploration
+            nsteps: number of steps between the two values of eps
+        """
+        self.env = env
+        super(BayesianExploration, self).__init__(eps_begin, eps_end, nsteps)
+
+
+    def get_action(self, best_action):
+        """
+        Returns a random action with prob epsilon, otherwise return the best_action
+
+        Args:
+            best_action: (int) best action according some policy
+        Returns:
+            an action
+        """
+        return best_action
+
 class PiecewiseExploration(PiecewiseSchedule):
     def __init__(self, env, endpoints, interpolation=linear_interpolation, outside_value=None):
         """

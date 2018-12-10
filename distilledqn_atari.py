@@ -6,7 +6,7 @@ import gym
 from utils.preprocess import greyscale
 from utils.wrappers import PreproWrapper, MaxAndSkipEnv
 
-from schedule import LinearExploration, LinearSchedule
+from schedule import LinearExploration, LinearSchedule, BayesianExploration
 from distilledqn import DistilledQN
 
 import config
@@ -40,7 +40,7 @@ if __name__ == '__main__':
     parser.add_argument('-ctq', '--choose_teacher_q', choices=['none', 'mean', 'random'],
         help='How to choose the teacher Q values for the student loss at each iteration.')
     parser.add_argument('-ep', '--exp_policy', type=str, default='greedy',
-        choices=['greedy'],
+        choices=['greedy', 'bayesian'],
         help='The exploration policy the student uses to learn from the teacher\'s Q values.')
 
     parser.add_argument('-tcd', '--teacher_checkpoint_dirs', nargs='+', type=str, 
@@ -93,9 +93,12 @@ if __name__ == '__main__':
                         overwrite_render=student_config.overwrite_render)
 
     # exploration strategy
-    exp_schedule = LinearExploration(env, student_config.eps_begin, 
-            student_config.eps_end, student_config.eps_nsteps)
-
+    if student_config.exp_policy == 'greedy':
+        exp_schedule = LinearExploration(env, student_config.eps_begin, 
+                student_config.eps_end, student_config.eps_nsteps)
+    if student_config.exp_policy == 'bayesian':
+        exp_schedule = BayesianExploration(env, student_config.eps_begin, 
+                student_config.eps_end, student_config.eps_nsteps)
     # learning rate schedule
     lr_schedule  = LinearSchedule(student_config.lr_begin, student_config.lr_end,
             student_config.lr_nsteps)
