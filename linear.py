@@ -72,7 +72,7 @@ class Linear(DQN):
             out = slim.dropout(out, self.keep_per)
             out = layers.fully_connected(layers.flatten(out), num_actions, activation_fn=None)
         
-        self.Q_dist = tf.nn.softmax(out / self.temp)
+        # self.Q_dist = tf.nn.softmax(out / self.temp)
 
         return out
 

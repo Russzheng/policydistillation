@@ -82,6 +82,10 @@ class DQN(QN):
         s = self.process_state(self.s)
         # self.q = self.get_q_values_op(s, scope="q%d" % student, reuse=False)
         self.q = self.get_q_values_op(s, scope=q_scope, reuse=False)
+        
+        # boltzmann
+        if student:
+            self.Q_dist = tf.nn.softmax(self.q / self.temp)
 
         # compute Q values of next state
         sp = self.process_state(self.sp)
