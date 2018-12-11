@@ -89,7 +89,7 @@ class QN(object):
         pass
 
 
-    def get_best_action(self, state, exp_policy):
+    def get_best_action(self, state, exp_policy, epsilon):
         """
         Returns best action according to the network
     
@@ -101,21 +101,21 @@ class QN(object):
         raise NotImplementedError
 
 
-    def get_action(self, state):
+    def get_action(self, state, epsilon):
         """
         Returns action with some epsilon strategy
 
         Args:
             state: observation from gym
         """
-        if self.config.exp_policy == 'greedy':
+        if self.config.exp_policy == 'egreedy':
             if np.random.random() < self.config.soft_epsilon:
                 return self.env.action_space.sample()
             else:
-                return self.get_best_action(state, self.config.exp_policy)[0]
-                
-        if self.config.exp_policy == 'bayesian':
-            return self.get_best_action(state, self.config.exp_policy)[0]
+                return self.get_best_action(state, self.config.exp_policy, epsilon)[0]
+
+        else:
+            return self.get_best_action(state, self.config.exp_policy, epsilon)[0]
 
 
     def update_target_params(self):
@@ -179,7 +179,7 @@ class QN(object):
 
         t = last_eval = last_record = 0 # time control of nb of steps
         scores_eval = [] # list of scores computed at iteration time
-        scores_eval += [self.evaluate()]
+        scores_eval += [self.evaluate(epsilon=exp_schedule.epsilon)]
         
         prog = Progbar(target=self.config.nsteps_train)
 
@@ -200,7 +200,7 @@ class QN(object):
 
                 # chose action according to current Q and exploration
                 # if self.config.exp_policy == 'None':
-                best_action, q_values = self.get_best_action(q_input, self.config.exp_policy)
+                best_action, q_values = self.get_best_action(q_input, self.config.exp_policy, exp_schedule.epsilon)
                 action                = exp_schedule.get_action(best_action)
                 # from IPython import embed; embed()
                 # store q values
@@ -246,17 +246,17 @@ class QN(object):
                 # evaluate our policy
                 last_eval = 0
                 print("")
-                scores_eval += [self.evaluate()]
+                scores_eval += [self.evaluate(epsilon=exp_schedule.epsilon)]
 
             if (t > self.config.learning_start) and self.config.record and (last_record > self.config.record_freq):
                 self.logger.info("Recording...")
                 last_record =0
-                self.record()
+                self.record(exp_schedule.epsilon)
 
         # last words
         self.logger.info("- Training done.")
         self.save()
-        scores_eval += [self.evaluate()]
+        scores_eval += [self.evaluate(epsilon=exp_schedule.epsilon)]
         export_plot(scores_eval, "Scores", self.config.plot_output)
 
 
@@ -285,7 +285,7 @@ class QN(object):
 
         return loss_eval, grad_eval
 
-    def evaluate(self, env=None, num_episodes=None):
+    def evaluate(self, epsilon, env=None, num_episodes=None):
         """
         Evaluation with same procedure as the training
         """
@@ -317,7 +317,7 @@ class QN(object):
                 idx     = replay_buffer.store_frame(state)
                 q_input = replay_buffer.encode_recent_observation()
 
-                action = self.get_action(q_input)
+                action = self.get_action(q_input, epsilon)
 
                 # perform action in env
                 new_state, reward, done, info = env.step(action)
@@ -344,7 +344,7 @@ class QN(object):
         return avg_reward
 
 
-    def record(self):
+    def record(self, epsilon):
         """
         Re create an env and record a video for one episode
         """
@@ -353,7 +353,7 @@ class QN(object):
         env = MaxAndSkipEnv(env, skip=self.config.skip_frame)
         env = PreproWrapper(env, prepro=greyscale, shape=(80, 80, 1), 
                         overwrite_render=self.config.overwrite_render)
-        self.evaluate(env, 1)
+        self.evaluate(env, epsilon, 1)
 
 
     def run(self, exp_schedule, lr_schedule):
@@ -369,12 +369,12 @@ class QN(object):
 
         # record one game at the beginning
         if self.config.record:
-            self.record()
+            self.record(exp_schedule.epsilon)
 
         # model
         self.train(exp_schedule, lr_schedule)
 
         # record one game at the end
         if self.config.record:
-            self.record()
+            self.record(exp_schedule.epsilon)
         

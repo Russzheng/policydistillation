@@ -93,14 +93,13 @@ class LinearExploration(LinearSchedule):
         Returns:
             an action
         """
-
         rand = np.random.choice([True, False], p=[self.epsilon, 1-self.epsilon])
         if rand:
             return self.env.action_space.sample()
         else:
             return best_action
 
-class BayesianExploration(LinearSchedule):
+class LinearGreedyExploration(LinearSchedule):
     def __init__(self, env, eps_begin, eps_end, nsteps):
         """
         Args:
@@ -110,12 +109,12 @@ class BayesianExploration(LinearSchedule):
             nsteps: number of steps between the two values of eps
         """
         self.env = env
-        super(BayesianExploration, self).__init__(eps_begin, eps_end, nsteps)
+        super(LinearGreedyExploration, self).__init__(eps_begin, eps_end, nsteps)
 
 
     def get_action(self, best_action):
         """
-        Returns a random action with prob epsilon, otherwise return the best_action
+        Returns the best_action
 
         Args:
             best_action: (int) best action according some policy

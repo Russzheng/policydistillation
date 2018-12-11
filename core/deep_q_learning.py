@@ -186,7 +186,7 @@ class DQN(QN):
         self.saver.save(self.sess, self.config.model_output)
 
 
-    def get_best_action(self, state, exp_policy):
+    def get_best_action(self, state, exp_policy, epsilon):
         """
         Return best action
 
@@ -197,11 +197,20 @@ class DQN(QN):
             action_values: (np array) q values for all actions
         """
         if exp_policy == 'bayesian':
-            action_values = self.sess.run(self.q, feed_dict={self.s: [state], self.keep_per: 0.1})[0]
+            action_values = self.sess.run(self.q, feed_dict={self.s: [state], self.keep_per: 1 - epsilon + 0.1})[0]
+        elif exp_policy == 'boltzmann':
+            Q_d, action_values = self.sess.run([self.Q_dist, self.q], feed_dict={self.s: [state], self.temp: epsilon, self.keep_per: 1.0})
+            # from Ipython import embed; embed()
         else:
             action_values = self.sess.run(self.q, feed_dict={self.s: [state], self.keep_per: 1.0})[0]
 
-        return np.argmax(action_values), action_values
+        if exp_policy == 'boltzmann':
+            a = np.random.choice(Q_d[0], p=Q_d[0])
+            a = np.argmax(Q_d[0] == a)
+            # from Ipython import embed; embed()
+            return a, action_values[0]
+        else:
+            return np.argmax(action_values), action_values
 
 
     def update_step(self, t, replay_buffer, lr):

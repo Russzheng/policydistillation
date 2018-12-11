@@ -49,8 +49,7 @@ class Linear(DQN):
                 shape=(self.num_teachers, None, num_actions))
 
             # temperature
-            self.temp = tf.placeholder(shape=(self.num_teachers, None, num_actions), dtype=tf.float32)
-            self.Q_dist = slim.softmax(self.teacher_q / self.temp)
+            self.temp = tf.placeholder(shape=None, dtype=tf.float32)
 
     def get_q_values_op(self, state, scope, reuse=False):
         """
@@ -72,6 +71,8 @@ class Linear(DQN):
         with tf.variable_scope(scope, reuse=reuse):
             out = slim.dropout(out, self.keep_per)
             out = layers.fully_connected(layers.flatten(out), num_actions, activation_fn=None)
+        
+        self.Q_dist = tf.nn.softmax(out / self.temp)
 
         return out
 
