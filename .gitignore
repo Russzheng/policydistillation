@@ -1,7 +1,0 @@
-.DS_Store
-gym/
-*.pyc
-results/
-*.npy
-sftp-config.json
-figures/
